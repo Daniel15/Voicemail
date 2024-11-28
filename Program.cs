@@ -1,19 +1,49 @@
+using System.Net.Http.Headers;
+using AssemblyAI;
+using Coravel;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Twilio.AspNet.Core;
 using Voicemail;
+using Voicemail.Extensions;
+using Voicemail.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add hard-coded settings
+builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+{
+	{"Coravel:Queue:ConsummationDelay", "1"}
+});
+
 var services = builder.Services;
 services.AddControllers();
 services.AddDbContext<VoicemailContext>();
 services.Configure<ForwardedHeadersOptions>(
 	options => options.ForwardedHeaders = ForwardedHeaders.All
 );
+services.AddQueue();
+services.AddHttpClient();
+services.ConfigureHttpClientDefaults(options =>
+{
+	options.ConfigureHttpClient(client =>
+	{
+		client.DefaultRequestHeaders.UserAgent.Add(
+			new ProductInfoHeaderValue("Daniel15-Voicemail", "1.0.0")
+		);
+	});
+});
+services.AddTransient<VoicemailProcessor>();
+
+// Third-party services
 services.AddTwilioClient();
 services.AddTwilioRequestValidation();
+services.AddAssemblyAIClient();
+services.AddScoped<IPhoneService, TwilioService>();
+services.AddScoped<ITranscriptionService, AssemblyAiService>();
 
 var app = builder.Build();
+app.EnableQueueLogging();
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseStaticFiles();

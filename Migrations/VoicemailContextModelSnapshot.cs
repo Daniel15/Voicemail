@@ -47,6 +47,42 @@ namespace Voicemail.Migrations
 
                     b.ToTable("Calls");
                 });
+
+            modelBuilder.Entity("Voicemail.Models.Transcript", b =>
+                {
+                    b.Property<int>("CallId")
+                        .HasColumnType("INTEGER");
+
+                    b.PrimitiveCollection<string>("MentionedCompanies")
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("MentionedNumbers")
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("MentionedPeople")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TranscriptText")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CallId");
+
+                    b.ToTable("Calls");
+                });
+
+            modelBuilder.Entity("Voicemail.Models.Transcript", b =>
+                {
+                    b.HasOne("Voicemail.Models.Call", null)
+                        .WithOne("Transcript")
+                        .HasForeignKey("Voicemail.Models.Transcript", "CallId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Voicemail.Models.Call", b =>
+                {
+                    b.Navigation("Transcript");
+                });
 #pragma warning restore 612, 618
         }
     }

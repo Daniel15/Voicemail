@@ -1,3 +1,4 @@
+using Coravel.Queuing.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Twilio.AspNet.Common;
 using Twilio.AspNet.Core;
@@ -11,8 +12,8 @@ namespace Voicemail;
 [Route("twilio")]
 public class TwilioController(
 	ILogger<TwilioController> _logger,
-	IHttpClientFactory _httpClientFactory,
-	VoicemailContext _dbContext
+	VoicemailContext _dbContext,
+	IQueue _queue
 ) : ControllerBase
 {
 	[Route("incoming_call")]
@@ -68,21 +69,15 @@ public class TwilioController(
 			return Results.BadRequest("Call ID is not valid");
 		}
 		
-		// Download recording
-		var client = _httpClientFactory.CreateClient();
-		var recordingResponse = await client.GetAsync(data.RecordingUrl);
-		recordingResponse.EnsureSuccessStatusCode();
-		var recordingFilePath =
-			Path.Combine(VoicemailContext.DataPath, "recordings", $"{call.Id}.mp3");
-		await using (var stream = System.IO.File.OpenWrite(recordingFilePath))
-		{
-			await recordingResponse.Content.CopyToAsync(stream);
-		}
+		_logger.LogInformation("[{CallSid}] Internal ID is {Id}", call.ExternalId, call.Id);
 		
 		call.RecordingDurationSeconds = data.RecordingDuration;
-		call.RecordingUrl = data.RecordingUrl;
+		// Twilio provides a WAV by default, but there's no disadvantage to getting an MP3 instead.
+		call.RecordingUrl = data.RecordingUrl + ".mp3";
 		await _dbContext.SaveChangesAsync();
-	
+
+		_queue.QueueInvocableWithPayload<VoicemailProcessor, int>(call.Id);
+		_logger.LogInformation("[{Id}] Added to processing queue", call.Id);
 		return Results.Created();
 	}
 }
