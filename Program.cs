@@ -55,11 +55,16 @@ Console.WriteLine($"Storing data in {VoicemailContext.DataPath}");
 Directory.CreateDirectory(VoicemailContext.DataPath);
 Directory.CreateDirectory(Path.Combine(VoicemailContext.DataPath, "recordings"));
 
-Console.WriteLine("Running DB migrations if needed...");
 using (var scope = app.Services.CreateScope())
 {
+	Console.WriteLine("Running DB migrations if needed...");
 	var db = scope.ServiceProvider.GetRequiredService<VoicemailContext>();
 	db.Database.Migrate();
+	
+	Console.WriteLine("Checking third-party APIs work...");
+	await scope.ServiceProvider.GetRequiredService<ITranscriptionService>().EnsureApiIsFunctional();
+	await scope.ServiceProvider.GetRequiredService<IPhoneService>().EnsureApiIsFunctional();
 }
 
+Console.WriteLine("Ready to rock!");
 app.Run();
