@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Coravel.Invocable;
+using Voicemail.Extensions;
 using Voicemail.Models;
 using Voicemail.Services;
 
@@ -11,7 +13,8 @@ public class VoicemailProcessor(
 	ILogger<VoicemailProcessor> _logger,
 	IHttpClientFactory _httpClientFactory,
 	VoicemailContext _dbContext,
-	ITranscriptionService _transcriptionService
+	ITranscriptionService _transcriptionService,
+	ICallerIdService _callerId
 )
 	: IInvocable, IInvocableWithPayload<int>
 {
@@ -29,16 +32,25 @@ public class VoicemailProcessor(
 		// The tasks are intentionally not `await`ed here, so that they run concurrently.
 		var downloadTask = Download(call);
 		var transcriptTask = Transcribe(call);
+		var callerIdTask = GetCallerId(call);
 
 		await downloadTask;
 		var transcript = await transcriptTask;
+		var callerId = await callerIdTask;
 
 		if (transcript != null)
 		{
 			transcript.CallId = call.Id;
 			call.Transcript = transcript;
 		}
-		
+
+		if (callerId != null)
+		{
+			callerId.CallId = call.Id;
+			call.CallerId = callerId;
+		}
+
+		call.Processed = true;
 		await _dbContext.SaveChangesAsync();
 		_logger.LogInformation("[{Id}] Processed call", call.Id);
 	}
@@ -75,18 +87,54 @@ public class VoicemailProcessor(
 	{
 		if (call.RecordingUrl == null)
 		{
-			_logger.LogError("[{Id}] Recording URL is missing", call.Id);
+			_logger.LogError("[{Id}][Transcribe] Recording URL is missing", call.Id);
 			return null;
 		}
 		
-		_logger.LogInformation("[{Id}] Transcribing recording", call.Id);
+		_logger.LogInformation("[{Id}][Transcribe] Starting", call.Id);
 		try
 		{
-			return await _transcriptionService.Transcribe(call.RecordingUrl);
+			var result = await _transcriptionService.Transcribe(call.RecordingUrl);
+			_logger.LogInformation(
+				"[{Id}][Transcribe] Result: {Result}", 
+				call.Id, 
+				JsonSerializer.Serialize(result)
+			);
+			return result;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "[{Id}] Failed to transcribe: {Error}", call.Id, ex.Message);
+			_logger.LogError(ex, "[{Id}][Transcribe] FAILED: {Error}", call.Id, ex.Message);
+			return null;
+		}
+	}
+
+	private async Task<CallerId?> GetCallerId(Call call)
+	{
+		if (call.NumberFrom is null)
+		{
+			_logger.LogWarning(
+				"[{Id}][CallerID] Phone number is missing; couldn't get caller ID",
+				call.Id
+			);
+			return null;
+		}
+		
+		_logger.LogInformation("[{Id}][CallerID] Starting", call.Id);
+		try
+		{
+			var result = await _callerId.GetCallerId(call.NumberFrom);
+			_logger.LogInformation(
+				"[{Id}][CallerID] Identified: {Number} -> {CallerId}'",
+				call.Id,
+				call.NumberFrom.ToPrettyFormat(),
+				JsonSerializer.Serialize(result)
+			);
+			return result;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "[{Id}][CallerID] FAILED: {Error}", call.Id, ex.Message);
 			return null;
 		}
 	}

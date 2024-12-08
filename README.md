@@ -11,4 +11,7 @@ dotnet user-secrets set 'Twilio:Client:ApiKeySecret' '.....'
 
 # AssemblyAI
 dotnet user-secrets set 'AssemblyAI:ApiKey' '....'
+
+# Trestle
+dotnet user-secrets set 'Trestle:ApiKey' '....'
 ```

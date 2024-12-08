@@ -1,5 +1,6 @@
 using Coravel.Queuing.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using PhoneNumbers;
 using Twilio.AspNet.Common;
 using Twilio.AspNet.Core;
 using Twilio.TwiML;
@@ -18,17 +19,21 @@ public class TwilioController(
 {
 	[Route("incoming_call")]
 	[ValidateRequest]
-	public async Task<TwiMLResult> IncomingCall([FromForm] VoiceRequest request) {
+	public async Task<TwiMLResult> IncomingCall([FromForm] VoiceRequest request)
+	{
+		var numberParser = PhoneNumberUtil.GetInstance();
+		var number = numberParser.Parse(request.From, "US");
+		var formattedNumber = numberParser.Format(number, PhoneNumberFormat.NATIONAL);
 		_logger.LogInformation(
 			"[{CallSid}] Received call from {Number}",
 			request.CallSid,
-			request.From
+			formattedNumber
 		);
 
 		_dbContext.Calls.Add(new Call
 		{
 			ExternalId = request.CallSid,
-			NumberFrom = request.From,
+			NumberFromRaw = numberParser.Format(number, PhoneNumberFormat.E164),
 			NumberTo = request.To,
 			NumberForwardedFrom = request.ForwardedFrom,
 		});

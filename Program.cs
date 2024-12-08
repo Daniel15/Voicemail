@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2024 Daniel Lo Nigro <d@d.sb>
+
 using System.Net.Http.Headers;
 using AssemblyAI;
 using Coravel;
@@ -5,6 +8,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Twilio.AspNet.Core;
 using Voicemail;
+using Voicemail.Configuration;
 using Voicemail.Extensions;
 using Voicemail.Services;
 
@@ -22,6 +26,7 @@ services.AddDbContext<VoicemailContext>();
 services.Configure<ForwardedHeadersOptions>(
 	options => options.ForwardedHeaders = ForwardedHeaders.All
 );
+services.Configure<TrestleConfig>(builder.Configuration.GetSection("Trestle"));
 services.AddQueue();
 services.AddHttpClient();
 services.ConfigureHttpClientDefaults(options =>
@@ -41,6 +46,7 @@ services.AddTwilioRequestValidation();
 services.AddAssemblyAIClient();
 services.AddScoped<IPhoneService, TwilioService>();
 services.AddScoped<ITranscriptionService, AssemblyAiService>();
+services.AddSingleton<ICallerIdService, TrestleService>();
 
 var app = builder.Build();
 app.EnableQueueLogging();
@@ -64,6 +70,7 @@ using (var scope = app.Services.CreateScope())
 	Console.WriteLine("Checking third-party APIs work...");
 	await scope.ServiceProvider.GetRequiredService<ITranscriptionService>().EnsureApiIsFunctional();
 	await scope.ServiceProvider.GetRequiredService<IPhoneService>().EnsureApiIsFunctional();
+	await scope.ServiceProvider.GetRequiredService<ICallerIdService>().EnsureApiIsFunctional();
 }
 
 Console.WriteLine("Ready to rock!");
