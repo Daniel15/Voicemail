@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voicemail", "Voicemail.csproj", "{51F456E5-823F-425E-AC97-21262255B2CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voicemail", "src\Voicemail\Voicemail.csproj", "{51F456E5-823F-425E-AC97-21262255B2CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
