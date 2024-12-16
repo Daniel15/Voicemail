@@ -1,6 +1,11 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2024 Daniel Lo Nigro <d@d.sb>
+
 using System.Text.Json;
 using Coravel.Invocable;
+using Coravel.Mailer.Mail.Interfaces;
 using Voicemail.Extensions;
+using Voicemail.Mailables;
 using Voicemail.Models;
 using Voicemail.Services;
 
@@ -14,7 +19,8 @@ public class VoicemailProcessor(
 	IHttpClientFactory _httpClientFactory,
 	VoicemailContext _dbContext,
 	ITranscriptionService _transcriptionService,
-	ICallerIdService _callerId
+	ICallerIdService _callerId,
+	IMailer _mailer
 )
 	: IInvocable, IInvocableWithPayload<int>
 {
@@ -53,6 +59,8 @@ public class VoicemailProcessor(
 		call.Processed = true;
 		await _dbContext.SaveChangesAsync();
 		_logger.LogInformation("[{Id}] Processed call", call.Id);
+
+		await SendEmail(call);
 	}
 
 	/// <summary>
@@ -136,6 +144,19 @@ public class VoicemailProcessor(
 		{
 			_logger.LogError(ex, "[{Id}][CallerID] FAILED: {Error}", call.Id, ex.Message);
 			return null;
+		}
+	}
+
+	private async Task SendEmail(Call call)
+	{
+		_logger.LogInformation("[{Id}][SendEmail] Sending email", call.Id);
+		try
+		{
+			await _mailer.SendAsync(new NewMessageMailable(call));
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "[{Id}][SendEmail] FAILED: {Error}", call.Id, ex.Message);
 		}
 	}
 }

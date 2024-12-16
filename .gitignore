@@ -2,6 +2,8 @@
 # https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 # https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+src/Voicemail/mail.log
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

@@ -21,6 +21,7 @@ builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
 });
 
 var services = builder.Services;
+builder.AddMailer();
 services.AddControllers();
 services.AddDbContext<VoicemailContext>();
 services.Configure<ForwardedHeadersOptions>(

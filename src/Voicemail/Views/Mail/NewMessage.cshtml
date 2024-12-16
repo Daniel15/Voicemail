@@ -1,0 +1,24 @@
+@* SPDX-License-Identifier: MIT *@
+@* SPDX-FileCopyrightText: 2024 Daniel Lo Nigro <d@d.sb> *@
+@model Voicemail.Mailables.NewMessageMailable.ViewModel
+@{
+	var call = Model.Call;
+	ViewBag.Heading = $"Voicemail from {Model.FormattedCaller}";
+	ViewBag.Preview = call.Transcript?.TranscriptSummary ?? call.Transcript?.TranscriptText;
+}
+
+<p>
+	@if (call.Transcript?.MentionedCompanies?.Count > 0)
+	{
+		@:Company: @string.Join(", ", call.Transcript.MentionedCompanies)<br />
+	}
+	@if (call.Transcript?.MentionedPeople?.Count > 0)
+	{
+		@:Person: @string.Join(", ", call.Transcript.MentionedPeople)<br />
+	}
+	@if (call.Transcript?.MentionedNumbers?.Count > 0)
+	{
+		@:Phone Numbers: @string.Join(", ", call.Transcript.MentionedNumbers)<br />
+	}
+</p>
+<p>@(call.Transcript?.TranscriptText ?? "No transcript available")</p>
