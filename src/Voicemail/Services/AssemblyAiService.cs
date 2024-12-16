@@ -18,12 +18,14 @@ public class AssemblyAiService(AssemblyAIClient _client) : ITranscriptionService
 			AudioUrl = recordingUrl,
 			SpeechModel = SpeechModel.Best,
 			EntityDetection = true,
+			Summarization = true,
 		});
 		transcript.EnsureStatusCompleted();
 
 		return new Voicemail.Models.Transcript
 		{
 			TranscriptText = transcript.Text,
+			TranscriptSummary = transcript.Summary,
 			MentionedCompanies = EntityTextByType(transcript, EntityType.Organization),
 			MentionedNumbers = EntityTextByType(transcript, EntityType.PhoneNumber),
 			MentionedPeople = EntityTextByType(transcript, EntityType.PersonName),

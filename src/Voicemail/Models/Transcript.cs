@@ -19,6 +19,11 @@ public class Transcript
 	/// Transcript of the call.
 	/// </summary>
 	public required string? TranscriptText { get; set; }
+
+	/// <summary>
+	/// Summary of the transcript.
+	/// </summary>
+	public string? TranscriptSummary { get; set; }
 	
 	/// <summary>
 	/// Phone numbers mentioned during the call.
