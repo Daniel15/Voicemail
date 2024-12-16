@@ -1,0 +1,35 @@
+{
+  "AssemblyAI": {
+    "ApiKey": "XXXXXXXXXXXX"
+  },
+  "Twilio": {
+    "AuthToken": "XXXXXXXXXXXX",
+    "Client": {
+      "AccountSid": "XXXXXXXXXXXX",
+      "ApiKeySid": "XXXXXXXXXXXX",
+      "ApiKeySecret": "XXXXXXXXXXXX"
+    }
+  },
+  "Trestle": {
+    "ApiKey": "XXXXXXXXXXXX"
+  },
+  "Coravel": {
+    "Mail": {
+      "Driver": "SMTP",
+      "Host": "mail.example.com",
+      "Port": 587,
+      "Username": "example@example.com",
+      "Password": "XXXXXXXXXXXX",
+      "From": {
+        "Address": "example@example.com",
+        "Name": "Voicemail"
+      }
+    }
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
+}
