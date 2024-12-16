@@ -18,11 +18,25 @@ public class NewMessageMailable(Call _call) : Mailable<NewMessageMailable.ViewMo
 		
 		// TODO: Recipient should be customizable
 		To("vm@d.sb")
-			.Subject($"Voicemail from {formattedCaller}") 
+			.Subject($"Voicemail from {formattedCaller}")
 			.View("~/Views/Mail/NewMessage.cshtml", new ViewModel(
 				Call: _call,
 				FormattedCaller: formattedCaller
 			));
+		
+		
+		// TODO: Remove duplication with VoicemailProcessor
+		var recordingFilePath =
+			Path.Combine(VoicemailContext.DataPath, "recordings", $"{_call.Id}.mp3");
+		if (File.Exists(recordingFilePath))
+		{
+			var bytes = File.ReadAllBytes(recordingFilePath);
+			Attach(new Attachment
+			{
+				Name = Path.GetFileName(recordingFilePath),
+				Bytes = bytes,
+			});
+		}
 	}
 
 	public readonly record struct ViewModel(
