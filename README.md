@@ -14,9 +14,20 @@ This project uses the following third-party providers:
 
 TBD
 
-# Installation and Configuration
+# Installation
+
+## Docker
 
 TBD
+
+## Manually
+
+A binary of the latest build can be downloaded from [TBD]
+
+## From source
+See "Development" section below.
+
+# Configuration
 
 Copy `appsettings.Production.json.example` and change settings to suit your environment.
 
@@ -42,6 +53,8 @@ dotnet user-secrets set 'Trestle:ApiKey' '....'
 
 To build the release version:
 ```shell
-dotnet publish -c Release
+dotnet publish -c Release -r linux-x64
 ```
-It will build into the `src/Voicemail/bin/Release/net9.0/linux-x64/publish` folder.
+(`linux-x64` can be replaced with [any architecture supported by .NET](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet9plus#platformarchitecture-restrictions)), such as `linux-arm64`, `windows-x64`, etc)
+
+It will build into the `src/Voicemail/bin/Release/net9.0/linux-x64/publish` folder. The release version is built as a self-contained executable and does not require .NET to be installed.
