@@ -40,13 +40,15 @@ services.ConfigureHttpClientDefaults(options =>
 	});
 });
 services.AddTransient<VoicemailProcessor>();
+services.AddTransient<Initialization>();
 
-// Third-party providers
+// Providers, both local and third-party.
 services.AddTwilioClient();
 services.AddTwilioRequestValidation();
 services.AddAssemblyAIClient();
 services.AddScoped<IPhoneProvider, TwilioProvider>();
 services.AddScoped<ITranscriptionProvider, AssemblyAiProvider>();
+services.AddScoped<ICallerIdProvider, LocalCallerIdProvider>();
 services.AddSingleton<ICallerIdProvider, TrestleProvider>();
 
 var app = builder.Build();
@@ -64,15 +66,7 @@ Directory.CreateDirectory(Path.Combine(VoicemailContext.DataPath, "recordings"))
 
 using (var scope = app.Services.CreateScope())
 {
-	Console.WriteLine("Running DB migrations if needed...");
-	var db = scope.ServiceProvider.GetRequiredService<VoicemailContext>();
-	db.Database.Migrate();
-	
-	Console.WriteLine("Checking third-party APIs work...");
-	await scope.ServiceProvider.GetRequiredService<ITranscriptionProvider>().EnsureApiIsFunctional();
-	await scope.ServiceProvider.GetRequiredService<IPhoneProvider>().EnsureApiIsFunctional();
-	await scope.ServiceProvider.GetRequiredService<ICallerIdProvider>().EnsureApiIsFunctional();
+	await scope.ServiceProvider.GetRequiredService<Initialization>().Initialize();
 }
 
-Console.WriteLine("Ready to rock!");
 app.Run();

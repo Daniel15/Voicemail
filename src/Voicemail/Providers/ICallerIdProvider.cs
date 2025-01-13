@@ -9,7 +9,7 @@ namespace Voicemail.Providers;
 /// <summary>
 /// Represents a provider that can do caller ID lookups.
 /// </summary>
-public interface ICallerIdProvider: IThirdPartyApi
+public interface ICallerIdProvider
 {
 	/// <summary>
 	/// Look up the specified phone number.

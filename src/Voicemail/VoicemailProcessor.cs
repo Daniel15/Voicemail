@@ -19,7 +19,7 @@ public class VoicemailProcessor(
 	IHttpClientFactory _httpClientFactory,
 	VoicemailContext _dbContext,
 	ITranscriptionProvider transcriptionProvider,
-	ICallerIdProvider _callerId,
+	IEnumerable<ICallerIdProvider> _callerIdProviders,
 	IMailer _mailer
 )
 	: IInvocable, IInvocableWithPayload<int>
@@ -131,14 +131,33 @@ public class VoicemailProcessor(
 		_logger.LogInformation("[{Id}][CallerID] Starting", call.Id);
 		try
 		{
-			var result = await _callerId.GetCallerId(call.NumberFrom);
+			// Try all caller ID providers sequentially - it's assumed that 'cheaper' providers
+			// are listed before 'expensive' providers, and that we don't want to call the expensive
+			// providers at all if a cheaper provider (e.g. a local DB lookup) has the result.
+			foreach (var provider in _callerIdProviders)
+			{
+				_logger.LogInformation(
+					"[{Id}][CallerID] Trying {Provider}",
+					call.Id,
+					provider.GetType().Name
+				);
+				var result = await provider.GetCallerId(call.NumberFrom);
+				if (result != null)
+				{
+					_logger.LogInformation(
+						"[{Id}][CallerID] Identified: {Number} -> {CallerId}'",
+						call.Id,
+						call.NumberFrom.ToPrettyFormat(),
+						JsonSerializer.Serialize(result)
+					);
+					return result;	
+				}
+			}
 			_logger.LogInformation(
-				"[{Id}][CallerID] Identified: {Number} -> {CallerId}'",
-				call.Id,
-				call.NumberFrom.ToPrettyFormat(),
-				JsonSerializer.Serialize(result)
+				"[{Id}][CallerID] No caller ID provider returned a result",
+				call.Id
 			);
-			return result;
+			return null;
 		}
 		catch (Exception ex)
 		{

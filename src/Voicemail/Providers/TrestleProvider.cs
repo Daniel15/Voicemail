@@ -13,10 +13,11 @@ using Voicemail.Models.Trestle;
 namespace Voicemail.Providers;
 
 /// <summary>
-/// Handles communicating with Trestle's API
+/// Handles caller ID lookups using Trestle's API
 /// </summary>
 /// <see href="https://trestle-api.redoc.ly/Current/" />
-public class TrestleProvider(IHttpClientFactory _factory, IOptionsMonitor<TrestleConfig> _options): ICallerIdProvider
+public class TrestleProvider(IHttpClientFactory _factory, IOptionsMonitor<TrestleConfig> _options)
+	: ICallerIdProvider, IThirdPartyApi
 {
 	private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
 	{
