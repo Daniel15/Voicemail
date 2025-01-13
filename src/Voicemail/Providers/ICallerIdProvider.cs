@@ -4,12 +4,12 @@
 using PhoneNumbers;
 using Voicemail.Models;
 
-namespace Voicemail.Services;
+namespace Voicemail.Providers;
 
 /// <summary>
-/// Represents a service that provides caller ID lookups.
+/// Represents a provider that can do caller ID lookups.
 /// </summary>
-public interface ICallerIdService: IThirdPartyApi
+public interface ICallerIdProvider: IThirdPartyApi
 {
 	/// <summary>
 	/// Look up the specified phone number.

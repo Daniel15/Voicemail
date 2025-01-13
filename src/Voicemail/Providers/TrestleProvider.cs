@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2024 Daniel Lo Nigro <d@d.sb>
 
-using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
@@ -11,13 +10,13 @@ using Voicemail.Extensions;
 using Voicemail.Models;
 using Voicemail.Models.Trestle;
 
-namespace Voicemail.Services;
+namespace Voicemail.Providers;
 
 /// <summary>
 /// Handles communicating with Trestle's API
 /// </summary>
 /// <see href="https://trestle-api.redoc.ly/Current/" />
-public class TrestleService(IHttpClientFactory _factory, IOptionsMonitor<TrestleConfig> _options): ICallerIdService
+public class TrestleProvider(IHttpClientFactory _factory, IOptionsMonitor<TrestleConfig> _options): ICallerIdProvider
 {
 	private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
 	{

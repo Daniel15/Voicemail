@@ -1,7 +1,7 @@
-namespace Voicemail.Services;
+namespace Voicemail.Providers;
 
 /// <summary>
-/// Represents a service that calls a third-party API.
+/// Represents a third-party API provider.
 /// </summary>
 public interface IThirdPartyApi
 {

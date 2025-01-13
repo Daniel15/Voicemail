@@ -1,9 +1,9 @@
 using Twilio.Clients;
 using Twilio.Rest.Api.V2010.Account;
 
-namespace Voicemail.Services;
+namespace Voicemail.Providers;
 
-public class TwilioService(ITwilioRestClient _client): IPhoneService
+public class TwilioProvider(ITwilioRestClient _client): IPhoneProvider
 {
 	/// <summary>
 	/// Ensures this API is working correctly. Called at app startup

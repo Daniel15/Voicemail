@@ -7,7 +7,7 @@ using Coravel.Mailer.Mail.Interfaces;
 using Voicemail.Extensions;
 using Voicemail.Mailables;
 using Voicemail.Models;
-using Voicemail.Services;
+using Voicemail.Providers;
 
 namespace Voicemail;
 
@@ -18,8 +18,8 @@ public class VoicemailProcessor(
 	ILogger<VoicemailProcessor> _logger,
 	IHttpClientFactory _httpClientFactory,
 	VoicemailContext _dbContext,
-	ITranscriptionService _transcriptionService,
-	ICallerIdService _callerId,
+	ITranscriptionProvider transcriptionProvider,
+	ICallerIdProvider _callerId,
 	IMailer _mailer
 )
 	: IInvocable, IInvocableWithPayload<int>
@@ -102,7 +102,7 @@ public class VoicemailProcessor(
 		_logger.LogInformation("[{Id}][Transcribe] Starting", call.Id);
 		try
 		{
-			var result = await _transcriptionService.Transcribe(call.RecordingUrl);
+			var result = await transcriptionProvider.Transcribe(call.RecordingUrl);
 			_logger.LogInformation(
 				"[{Id}][Transcribe] Result: {Result}", 
 				call.Id, 

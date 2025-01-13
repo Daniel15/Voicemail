@@ -1,12 +1,15 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2025 Daniel Lo Nigro <d@d.sb>
+
 using AssemblyAI;
 using AssemblyAI.Transcripts;
 
-namespace Voicemail.Services;
+namespace Voicemail.Providers;
 
 /// <summary>
 /// Handles communicating with AssemblyAI's API.
 /// </summary>
-public class AssemblyAiService(AssemblyAIClient _client) : ITranscriptionService
+public class AssemblyAiProvider(AssemblyAIClient _client) : ITranscriptionProvider
 {
 	/// <summary>
 	/// Transcribe the phone call recording at the specified URL.

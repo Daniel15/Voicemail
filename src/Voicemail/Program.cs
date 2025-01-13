@@ -10,7 +10,7 @@ using Twilio.AspNet.Core;
 using Voicemail;
 using Voicemail.Configuration;
 using Voicemail.Extensions;
-using Voicemail.Services;
+using Voicemail.Providers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,13 +41,13 @@ services.ConfigureHttpClientDefaults(options =>
 });
 services.AddTransient<VoicemailProcessor>();
 
-// Third-party services
+// Third-party providers
 services.AddTwilioClient();
 services.AddTwilioRequestValidation();
 services.AddAssemblyAIClient();
-services.AddScoped<IPhoneService, TwilioService>();
-services.AddScoped<ITranscriptionService, AssemblyAiService>();
-services.AddSingleton<ICallerIdService, TrestleService>();
+services.AddScoped<IPhoneProvider, TwilioProvider>();
+services.AddScoped<ITranscriptionProvider, AssemblyAiProvider>();
+services.AddSingleton<ICallerIdProvider, TrestleProvider>();
 
 var app = builder.Build();
 app.EnableQueueLogging();
@@ -69,9 +69,9 @@ using (var scope = app.Services.CreateScope())
 	db.Database.Migrate();
 	
 	Console.WriteLine("Checking third-party APIs work...");
-	await scope.ServiceProvider.GetRequiredService<ITranscriptionService>().EnsureApiIsFunctional();
-	await scope.ServiceProvider.GetRequiredService<IPhoneService>().EnsureApiIsFunctional();
-	await scope.ServiceProvider.GetRequiredService<ICallerIdService>().EnsureApiIsFunctional();
+	await scope.ServiceProvider.GetRequiredService<ITranscriptionProvider>().EnsureApiIsFunctional();
+	await scope.ServiceProvider.GetRequiredService<IPhoneProvider>().EnsureApiIsFunctional();
+	await scope.ServiceProvider.GetRequiredService<ICallerIdProvider>().EnsureApiIsFunctional();
 }
 
 Console.WriteLine("Ready to rock!");
