@@ -15,15 +15,18 @@ public class NewMessageMailable(Call _call) : Mailable<NewMessageMailable.ViewMo
 		{
 			formattedCaller += $" ({_call.CallerId.CallerName})";
 		}
+		var subject = _call.IsCompleted
+			? $"Voicemail from {formattedCaller}"
+			: $"Missed call from {formattedCaller}";
 		
 		// TODO: Recipient should be customizable
 		To("vm@d.sb")
-			.Subject($"Voicemail from {formattedCaller}")
+			.Subject(subject)
 			.View("~/Views/Mail/NewMessage.cshtml", new ViewModel(
 				Call: _call,
-				FormattedCaller: formattedCaller
+				FormattedCaller: formattedCaller,
+				Subject: subject
 			));
-		
 		
 		// TODO: Remove duplication with VoicemailProcessor
 		var recordingFilePath =
@@ -41,6 +44,7 @@ public class NewMessageMailable(Call _call) : Mailable<NewMessageMailable.ViewMo
 
 	public readonly record struct ViewModel(
 		Call Call,
-		string FormattedCaller
+		string FormattedCaller,
+		string Subject
 	);
 }

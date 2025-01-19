@@ -68,6 +68,12 @@ public class VoicemailProcessor(
 	/// </summary>
 	private async Task Download(Call call)
 	{
+		if (call.RecordingUrl == null)
+		{
+			_logger.LogInformation("[{Id}] No recording URL; couldn't download recording", call.Id);
+			return;
+		}
+		
 		_logger.LogInformation("[{Id}] Downloading recording", call.Id);
 		try
 		{
@@ -95,7 +101,7 @@ public class VoicemailProcessor(
 	{
 		if (call.RecordingUrl == null)
 		{
-			_logger.LogError("[{Id}][Transcribe] Recording URL is missing", call.Id);
+			_logger.LogInformation("[{Id}][Transcribe] Recording URL is missing", call.Id);
 			return null;
 		}
 		

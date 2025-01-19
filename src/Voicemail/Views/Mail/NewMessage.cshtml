@@ -1,10 +1,13 @@
 @* SPDX-License-Identifier: MIT *@
 @* SPDX-FileCopyrightText: 2024 Daniel Lo Nigro <d@d.sb> *@
+@using Voicemail.Extensions
 @model Voicemail.Mailables.NewMessageMailable.ViewModel
 @{
 	var call = Model.Call;
-	ViewBag.Heading = $"Voicemail from {Model.FormattedCaller}";
-	ViewBag.Preview = call.Transcript?.TranscriptSummary ?? call.Transcript?.TranscriptText;
+	ViewBag.Heading = Model.Subject;
+	ViewBag.Preview = call.IsCompleted
+		? (call.Transcript?.TranscriptSummary ?? call.Transcript?.TranscriptText)
+		: "No message was left";
 }
 
 <p>
@@ -21,4 +24,18 @@
 		@:Phone Numbers: @string.Join(", ", call.Transcript.MentionedNumbers)<br />
 	}
 </p>
-<p>@(call.Transcript?.TranscriptText ?? "No transcript available")</p>
+
+@if (call.IsCompleted)
+{
+	<p>@(call.Transcript?.TranscriptText ?? "No transcript available")</p>		
+}
+else
+{
+	<p>No message was left.</p>
+}
+
+@if (call.NumberFrom != null)
+{
+	<vc:email-link-button text="Call Back" url="tel:@call.NumberFrom.ToE164()" />	
+}
+

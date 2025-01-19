@@ -58,6 +58,12 @@ public class Call
 	public string? RecordingUrl { get; set; }
 
 	/// <summary>
+	/// Whether the call was completed without the user hanging up.
+	/// </summary>
+	[Column("completed")]
+	public bool IsCompleted { get; set; } = false;
+
+	/// <summary>
 	/// Whether this call has been fully processed yet.
 	/// </summary>
 	public bool Processed { get; set; } = false;
