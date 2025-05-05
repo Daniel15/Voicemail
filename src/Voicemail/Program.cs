@@ -5,12 +5,12 @@ using System.Net.Http.Headers;
 using AssemblyAI;
 using Coravel;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore;
 using Twilio.AspNet.Core;
 using Voicemail;
 using Voicemail.Configuration;
 using Voicemail.Extensions;
 using Voicemail.Providers;
+using Voicemail.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +41,7 @@ services.ConfigureHttpClientDefaults(options =>
 });
 services.AddTransient<VoicemailProcessor>();
 services.AddTransient<Initialization>();
+services.AddSingleton<IRecordingRepository, LocalRecordingRepository>();
 
 // Providers, both local and third-party.
 services.AddTwilioClient();

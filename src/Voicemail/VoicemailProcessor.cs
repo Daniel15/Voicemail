@@ -8,6 +8,7 @@ using Voicemail.Extensions;
 using Voicemail.Mailables;
 using Voicemail.Models;
 using Voicemail.Providers;
+using Voicemail.Repositories;
 
 namespace Voicemail;
 
@@ -16,11 +17,12 @@ namespace Voicemail;
 /// </summary>
 public class VoicemailProcessor(
 	ILogger<VoicemailProcessor> _logger,
-	IHttpClientFactory _httpClientFactory,
 	VoicemailContext _dbContext,
 	ITranscriptionProvider transcriptionProvider,
 	IEnumerable<ICallerIdProvider> _callerIdProviders,
-	IMailer _mailer
+	IMailer _mailer,
+	IRecordingRepository _recordingRepository,
+	IHttpClientFactory _httpClientFactory 
 )
 	: IInvocable, IInvocableWithPayload<int>
 {
@@ -80,10 +82,8 @@ public class VoicemailProcessor(
 			var client = _httpClientFactory.CreateClient();
 			var recordingResponse = await client.GetAsync(call.RecordingUrl);
 			recordingResponse.EnsureSuccessStatusCode();
-			var recordingFilePath =
-				Path.Combine(VoicemailContext.DataPath, "recordings", $"{call.Id}.mp3");
-			await using var stream = File.OpenWrite(recordingFilePath);
-			await recordingResponse.Content.CopyToAsync(stream);
+			await using var stream = await recordingResponse.Content.ReadAsStreamAsync();
+			await _recordingRepository.Save(call, stream);
 			_logger.LogInformation("[{Id}] Download complete", call.Id);
 		}
 		catch (Exception ex)
@@ -177,7 +177,15 @@ public class VoicemailProcessor(
 		_logger.LogInformation("[{Id}][SendEmail] Sending email", call.Id);
 		try
 		{
-			await _mailer.SendAsync(new NewMessageMailable(call));
+			byte[]? recording = null;
+			await using var stream = _recordingRepository.Get(call);
+			if (stream != null)
+			{
+				using var memoryStream = new MemoryStream();
+				await stream.CopyToAsync(memoryStream);
+				recording = memoryStream.ToArray();
+			}
+			await _mailer.SendAsync(new NewMessageMailable(call, recording));
 		}
 		catch (Exception ex)
 		{

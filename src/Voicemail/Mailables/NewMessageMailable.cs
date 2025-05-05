@@ -6,7 +6,10 @@ using Voicemail.Extensions;
 using Voicemail.Models;
 
 namespace Voicemail.Mailables;
-public class NewMessageMailable(Call _call) : Mailable<NewMessageMailable.ViewModel>
+public class NewMessageMailable(
+	Call _call,
+	byte[]? _recording
+) : Mailable<NewMessageMailable.ViewModel>
 {
 	public override void Build()
 	{
@@ -27,17 +30,13 @@ public class NewMessageMailable(Call _call) : Mailable<NewMessageMailable.ViewMo
 				FormattedCaller: formattedCaller,
 				Subject: subject
 			));
-		
-		// TODO: Remove duplication with VoicemailProcessor
-		var recordingFilePath =
-			Path.Combine(VoicemailContext.DataPath, "recordings", $"{_call.Id}.mp3");
-		if (File.Exists(recordingFilePath))
+
+		if (_recording != null)
 		{
-			var bytes = File.ReadAllBytes(recordingFilePath);
 			Attach(new Attachment
 			{
-				Name = Path.GetFileName(recordingFilePath),
-				Bytes = bytes,
+				Name = $"recording-{_call.Id}.mp3",
+				Bytes = _recording,
 			});
 		}
 	}
