@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2024 Daniel Lo Nigro <d@d.sb>
+// SPDX-FileCopyrightText: 2025 Daniel Lo Nigro <d@d.sb>
 
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using PhoneNumbers;
 
 namespace Voicemail.Models;
+using static Constants;
 
 /// <summary>
 /// Represents a call that was received.
@@ -35,12 +36,21 @@ public class Call
 	/// </summary>
 	[NotMapped]
 	public PhoneNumber? NumberFrom => 
-		PhoneNumberUtil.GetInstance().Parse(NumberFromRaw, "US");
+		PhoneNumberUtil.GetInstance().Parse(NumberFromRaw, DefaultRegion);
 	
 	/// <summary>
 	/// Phone number the call was forwarded from.
 	/// </summary>
-	public string? NumberForwardedFrom { get; set; }
+	[Column("NumberForwardedFrom")]
+	public string? NumberForwardedFromRaw { get; set; }
+	
+	/// <summary>
+	/// Phone number the call was forwarded from.
+	/// </summary>
+	[NotMapped]
+	public PhoneNumber? NumberForwardedFrom => 
+		PhoneNumberUtil.GetInstance().Parse(NumberFromRaw, DefaultRegion);
+	
 	
 	/// <summary>
 	/// Phone number the call went to.

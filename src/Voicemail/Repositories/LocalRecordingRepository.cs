@@ -8,7 +8,7 @@ namespace Voicemail.Repositories;
 /// <summary>
 /// Implementation of <see cref="IRecordingRepository"/> that stores recordings locally.
 /// </summary>
-public class LocalRecordingRepository(IHttpClientFactory _httpClientFactory) : IRecordingRepository
+public class LocalRecordingRepository : IRecordingRepository
 {
 	/// <inheritdoc />
 	public async Task Save(Call call, Stream stream)

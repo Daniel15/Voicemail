@@ -8,16 +8,20 @@ using PhoneNumbers;
 using Twilio.AspNet.Common;
 using Twilio.AspNet.Core;
 using Twilio.TwiML;
+using Voicemail.Extensions;
 using Voicemail.Models;
 using Voicemail.Models.Twilio;
+using Voicemail.Repositories;
+using static Voicemail.Constants;
 
-namespace Voicemail;
+namespace Voicemail.Controllers;
 
 [ApiController]
 [Route("twilio")]
 public class TwilioController(
 	ILogger<TwilioController> _logger,
 	VoicemailContext _dbContext,
+	IAccountRepository _accounts,
 	IQueue _queue
 ) : ControllerBase
 {
@@ -28,20 +32,52 @@ public class TwilioController(
 	public async Task<TwiMLResult> IncomingCall([FromForm] VoiceRequest request)
 	{
 		var numberParser = PhoneNumberUtil.GetInstance();
-		var number = numberParser.Parse(request.From, "US");
-		var formattedNumber = numberParser.Format(number, PhoneNumberFormat.NATIONAL);
+		var numberFrom = numberParser.Parse(request.From, DefaultRegion);
+
+		var numberForwardedFromRaw = request.ForwardedFrom ?? request.Digits;
+		if (numberForwardedFromRaw is null)
+		{
+			_logger.LogInformation(
+				"[{CallSid}] Received call from {Number} with no valid forwarded number. Prompting for mailbox number",
+				request.CallSid,
+				numberFrom.ToPrettyFormat()
+			);
+			var requestNumberResponse = new VoiceResponse();
+			requestNumberResponse.Say(
+				"Please enter the mailbox you want to leave a message for, "+
+				"then press pound."
+			);
+			requestNumberResponse.Gather(finishOnKey: "#");
+			return this.TwiML(requestNumberResponse);
+		}
+		
+		var numberForwardedFrom = numberParser.Parse(numberForwardedFromRaw, DefaultRegion);
 		_logger.LogInformation(
-			"[{CallSid}] Received call from {Number}",
+			"[{CallSid}] Received call from {Number} for {NumberForwardedFrom}",
 			request.CallSid,
-			formattedNumber
+			numberFrom.ToPrettyFormat(),
+			numberForwardedFrom.ToPrettyFormat()
 		);
+		
+		// Ensure phone number is actually in the system.
+		var account = _accounts.TryGetAccount(numberForwardedFrom);
+		if (account is null)
+		{
+			_logger.LogInformation(
+				"[{CallSid}] Invalid mailbox! Returning an error.",
+				request.CallSid
+			);
+			var errorResponse = new VoiceResponse();
+			errorResponse.Say("Sorry, this is an invalid mailbox. Good bye.");
+			return this.TwiML(errorResponse);
+		}
 
 		var call = new Call
 		{
 			ExternalId = request.CallSid,
-			NumberFromRaw = numberParser.Format(number, PhoneNumberFormat.E164),
+			NumberFromRaw = numberParser.Format(numberFrom, PhoneNumberFormat.E164),
 			NumberTo = request.To,
-			NumberForwardedFrom = request.ForwardedFrom,
+			NumberForwardedFromRaw = request.ForwardedFrom,
 		};
 		_dbContext.Calls.Add(call);
 		await _dbContext.SaveChangesAsync();
@@ -52,7 +88,7 @@ public class TwilioController(
 		);
 		
 		var response = new VoiceResponse();
-		response.Play(new Uri(Url.Content("~/greeting.mp3")));
+		response.Play(new Uri(Url.Content("~/" + account.GreetingFile)));
 		response.Record(
 			action: new Uri(Url.ActionAbsolute("Twilio", "CallCompleted")),
 			recordingStatusCallback: new Uri(Url.ActionAbsolute(

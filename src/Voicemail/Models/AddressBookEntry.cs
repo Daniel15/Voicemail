@@ -4,6 +4,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using PhoneNumbers;
+using static Voicemail.Constants;
 
 namespace Voicemail.Models;
 
@@ -28,7 +29,8 @@ public class AddressBookEntry
 	/// <summary>
 	/// Phone number for this entry
 	/// </summary>
-	public PhoneNumber Number => PhoneNumberUtil.GetInstance().Parse(NumberRaw, "US");
+	public PhoneNumber Number => 
+		PhoneNumberUtil.GetInstance().Parse(NumberRaw, DefaultRegion);
 	
 	/// <summary>
 	/// Name for this entry

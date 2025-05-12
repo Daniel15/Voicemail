@@ -28,6 +28,7 @@ services.Configure<ForwardedHeadersOptions>(
 	options => options.ForwardedHeaders = ForwardedHeaders.All
 );
 services.Configure<TrestleConfig>(builder.Configuration.GetSection("Trestle"));
+services.Configure<List<AccountConfig>>(builder.Configuration.GetSection("Accounts"));
 services.AddQueue();
 services.AddHttpClient();
 services.ConfigureHttpClientDefaults(options =>
@@ -42,6 +43,7 @@ services.ConfigureHttpClientDefaults(options =>
 services.AddTransient<VoicemailProcessor>();
 services.AddTransient<Initialization>();
 services.AddSingleton<IRecordingRepository, LocalRecordingRepository>();
+services.AddSingleton<IAccountRepository, ConfigAccountRepository>();
 
 // Providers, both local and third-party.
 services.AddTwilioClient();

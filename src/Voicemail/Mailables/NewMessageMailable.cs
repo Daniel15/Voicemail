@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2024 Daniel Lo Nigro <d@d.sb>
+// SPDX-FileCopyrightText: 2025 Daniel Lo Nigro <d@d.sb>
 
 using Coravel.Mailer.Mail;
+using Voicemail.Configuration;
 using Voicemail.Extensions;
 using Voicemail.Models;
 
 namespace Voicemail.Mailables;
 public class NewMessageMailable(
 	Call _call,
+	AccountConfig _account,
 	byte[]? _recording
 ) : Mailable<NewMessageMailable.ViewModel>
 {
@@ -22,8 +24,7 @@ public class NewMessageMailable(
 			? $"Voicemail from {formattedCaller}"
 			: $"Missed call from {formattedCaller}";
 		
-		// TODO: Recipient should be customizable
-		To("vm@d.sb")
+		To(_account.Email)
 			.Subject(subject)
 			.View("~/Views/Mail/NewMessage.cshtml", new ViewModel(
 				Call: _call,

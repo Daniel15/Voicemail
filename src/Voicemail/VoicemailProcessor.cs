@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2024 Daniel Lo Nigro <d@d.sb>
+// SPDX-FileCopyrightText: 2025 Daniel Lo Nigro <d@d.sb>
 
 using System.Text.Json;
 using Coravel.Invocable;
@@ -22,7 +22,8 @@ public class VoicemailProcessor(
 	IEnumerable<ICallerIdProvider> _callerIdProviders,
 	IMailer _mailer,
 	IRecordingRepository _recordingRepository,
-	IHttpClientFactory _httpClientFactory 
+	IHttpClientFactory _httpClientFactory,
+	IAccountRepository _accountRepository
 )
 	: IInvocable, IInvocableWithPayload<int>
 {
@@ -177,6 +178,7 @@ public class VoicemailProcessor(
 		_logger.LogInformation("[{Id}][SendEmail] Sending email", call.Id);
 		try
 		{
+			var account = _accountRepository.GetAccount(call.NumberForwardedFrom!);
 			byte[]? recording = null;
 			await using var stream = _recordingRepository.Get(call);
 			if (stream != null)
@@ -185,7 +187,7 @@ public class VoicemailProcessor(
 				await stream.CopyToAsync(memoryStream);
 				recording = memoryStream.ToArray();
 			}
-			await _mailer.SendAsync(new NewMessageMailable(call, recording));
+			await _mailer.SendAsync(new NewMessageMailable(call, account, recording));
 		}
 		catch (Exception ex)
 		{
