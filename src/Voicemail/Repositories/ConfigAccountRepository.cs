@@ -33,4 +33,9 @@ public class ConfigAccountRepository : IAccountRepository
 		return TryGetAccount(number) ?? 
 		       throw new ArgumentException($"Account {number.ToPrettyFormat()} not found");
 	}
+
+	public IEnumerable<AccountConfig> GetAllAccounts()
+	{
+		return _accounts.CurrentValue.ToList();
+	}
 }

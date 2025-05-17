@@ -13,6 +13,13 @@
   "Trestle": {
     "ApiKey": "XXXXXXXXXXXX"
   },
+  "Accounts": [
+    {
+      "PhoneNumber": "+16505551234",
+      "GreetingFile": "greeting.mp3",
+      "Email": "dan@example.com"
+    }
+  ],
   "Coravel": {
     "Mail": {
       "Driver": "SMTP",

@@ -22,4 +22,10 @@ public interface IAccountRepository
 	/// recognized.
 	/// </summary>
 	public AccountConfig GetAccount(PhoneNumber number);
+
+	/// <summary>
+	/// Gets all the registered accounts.
+	/// </summary>
+	/// <returns></returns>
+	public IEnumerable<AccountConfig> GetAllAccounts();
 }
