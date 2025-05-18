@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using AssemblyAI;
 using Coravel;
 using Microsoft.AspNetCore.HttpOverrides;
+using PhoneNumbers;
 using Twilio.AspNet.Core;
 using Voicemail;
 using Voicemail.Configuration;
@@ -53,6 +54,7 @@ services.AddScoped<IPhoneProvider, TwilioProvider>();
 services.AddScoped<ITranscriptionProvider, AssemblyAiProvider>();
 services.AddScoped<ICallerIdProvider, LocalCallerIdProvider>();
 services.AddSingleton<ICallerIdProvider, TrestleProvider>();
+services.AddSingleton(PhoneNumberUtil.GetInstance());
 
 var app = builder.Build();
 app.EnableQueueLogging();
