@@ -22,7 +22,8 @@ public class TwilioController(
 	ILogger<TwilioController> _logger,
 	VoicemailContext _dbContext,
 	IAccountRepository _accounts,
-	IQueue _queue
+	IQueue _queue,
+	PhoneNumberUtil _numberParser
 ) : ControllerBase
 {
 	private const string CALL_STATUS_COMPLETED = "completed";
@@ -31,8 +32,7 @@ public class TwilioController(
 	[ValidateRequest]
 	public async Task<TwiMLResult> IncomingCall([FromForm] VoiceRequest request)
 	{
-		var numberParser = PhoneNumberUtil.GetInstance();
-		var numberFrom = numberParser.Parse(request.From, DefaultRegion);
+		var numberFrom = _numberParser.Parse(request.From, DefaultRegion);
 
 		var numberForwardedFromRaw = request.ForwardedFrom ?? request.Digits;
 		if (numberForwardedFromRaw is null)
@@ -51,7 +51,7 @@ public class TwilioController(
 			return this.TwiML(requestNumberResponse);
 		}
 		
-		var numberForwardedFrom = numberParser.Parse(numberForwardedFromRaw, DefaultRegion);
+		var numberForwardedFrom = _numberParser.Parse(numberForwardedFromRaw, DefaultRegion);
 		_logger.LogInformation(
 			"[{CallSid}] Received call from {Number} for {NumberForwardedFrom}",
 			request.CallSid,
@@ -75,7 +75,7 @@ public class TwilioController(
 		var call = new Call
 		{
 			ExternalId = request.CallSid,
-			NumberFromRaw = numberParser.Format(numberFrom, PhoneNumberFormat.E164),
+			NumberFromRaw = numberFrom.ToE164(),
 			NumberTo = request.To,
 			NumberForwardedFromRaw = request.ForwardedFrom,
 		};

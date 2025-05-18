@@ -19,7 +19,8 @@ public class Initialization(
 	IEnumerable<ICallerIdProvider> _callerIdProviders,
 	IAccountRepository _accountRepository,
 	IWebHostEnvironment _webHostEnvironment,
-	ILogger<Initialization> _logger
+	ILogger<Initialization> _logger,
+	PhoneNumberUtil _numberParser
 )
 {
 
@@ -50,11 +51,10 @@ public class Initialization(
 	private void CheckAccounts()
 	{
 		_logger.LogInformation("Checking all accounts are valid");
-		var numberParser = PhoneNumberUtil.GetInstance();
 		var accounts = _accountRepository.GetAllAccounts();
 		foreach (var account in accounts)
 		{
-			var number = numberParser.Parse(account.PhoneNumber, DefaultRegion);
+			var number = _numberParser.Parse(account.PhoneNumber, DefaultRegion);
 			if (number == null)
 			{
 				throw new Exception($"Unknown phone number format: {account.PhoneNumber}");
