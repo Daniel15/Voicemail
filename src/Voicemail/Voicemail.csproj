@@ -36,6 +36,14 @@
       <Content Include="appsettings.Production.json.example">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <None Remove="nginx.conf" />
+      <Content Include="nginx.conf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="voicemail.service" />
+      <Content Include="voicemail.service">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>

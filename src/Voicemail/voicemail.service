@@ -1,0 +1,16 @@
+[Unit]
+Description=Voicemail
+
+[Service]
+WorkingDirectory=/var/www/voicemail/
+ExecStart=/var/www/voicemail/Voicemail
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=voicemail
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://unix:/tmp/voicemail.sock
+
+[Install]
+WantedBy=multi-user.target
