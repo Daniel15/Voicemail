@@ -1,6 +1,6 @@
 # Voicemail
 
-Basic voicemail system, *powered by AI* because it's the cool thing to do these days. It is **currently under construction** and isn't ready for usage yet.
+Basic voicemail system, *powered by AI* because it's the cool thing to do these days. 
 
 This project uses the following third-party providers:
 
@@ -33,7 +33,7 @@ Copy `appsettings.Production.json.example` and change settings to suit your envi
 
 # Development
 
-1. Install [.NET 9.0](https://learn.microsoft.com/en-us/dotnet/core/install/linux)
+1. Install [.NET 10.0](https://learn.microsoft.com/en-us/dotnet/core/install/linux)
 2. Clone the repo
 3. Set access tokens/keys in .NET Secrets, to avoid accidentally commiting them to the repo:
 ```
@@ -57,4 +57,4 @@ dotnet publish -c Release -r linux-x64
 ```
 (`linux-x64` can be replaced with [any architecture supported by .NET](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet9plus#platformarchitecture-restrictions)), such as `linux-arm64`, `windows-x64`, etc)
 
-It will build into the `src/Voicemail/bin/Release/net9.0/linux-x64/publish` folder. The release version is built as a self-contained executable and does not require .NET to be installed.
+It will build into the `src/Voicemail/bin/Release/net10.0/linux-x64/publish` folder. The release version is built as a self-contained executable and does not require .NET to be installed.
