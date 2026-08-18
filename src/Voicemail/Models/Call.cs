@@ -49,7 +49,7 @@ public class Call
 	/// </summary>
 	[NotMapped]
 	public PhoneNumber? NumberForwardedFrom => 
-		PhoneNumberUtil.GetInstance().Parse(NumberFromRaw, DefaultRegion);
+		PhoneNumberUtil.GetInstance().Parse(NumberForwardedFromRaw, DefaultRegion);
 	
 	
 	/// <summary>
