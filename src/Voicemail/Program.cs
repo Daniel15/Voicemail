@@ -28,6 +28,7 @@ services.AddDbContext<VoicemailContext>();
 services.Configure<ForwardedHeadersOptions>(
 	options => options.ForwardedHeaders = ForwardedHeaders.All
 );
+services.Configure<AssemblyAIConfig>(builder.Configuration.GetSection("AssemblyAI"));
 services.Configure<TrestleConfig>(builder.Configuration.GetSection("Trestle"));
 services.Configure<List<AccountConfig>>(builder.Configuration.GetSection("Accounts"));
 services.AddQueue();
@@ -49,7 +50,6 @@ services.AddSingleton<IAccountRepository, ConfigAccountRepository>();
 // Providers, both local and third-party.
 services.AddTwilioClient();
 services.AddTwilioRequestValidation();
-services.AddAssemblyAIClient();
 services.AddScoped<IPhoneProvider, TwilioProvider>();
 services.AddScoped<ITranscriptionProvider, AssemblyAiProvider>();
 services.AddScoped<ICallerIdProvider, LocalCallerIdProvider>();

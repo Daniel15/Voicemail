@@ -16,7 +16,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="AssemblyAI" Version="1.2.2" />
       <PackageReference Include="Coravel" Version="6.0.2" />
       <PackageReference Include="Coravel.Mailer" Version="7.1.0" />
       <PackageReference Include="libphonenumber-csharp" Version="9.0.37" />
@@ -25,6 +24,7 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+      <PackageReference Include="tryAGI.AssemblyAI" Version="1.0.1-dev.2" />
       <PackageReference Include="Twilio" Version="7.14.9" />
       <PackageReference Include="Twilio.AspNet.Core" Version="8.1.2" />
     </ItemGroup>
